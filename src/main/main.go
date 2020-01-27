@@ -8,9 +8,15 @@ import (
 	"strings"
 	"time"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
+
+type JwtClaims struct {
+	Name string `json: "name"`
+	jwt.StandartClaims
+}
 
 func main() {
 	fmt.Println("welcome to the server")
@@ -71,10 +77,39 @@ func login(c echo.Context) error {
 
 		c.SetCookie(cookie)
 
-		return c.String(http.StatusOK, "You were logged in!")
+		token, err := createJWTToken()
+		if err != nil {
+			log.Println("Error Creating JWT token", err)
+			return c.String(http.StatusInternalServerError, "something went wrong")
+		}
+
+		return c.JSON(http.StatusOK, map[string]string{
+			"message": "You were logged in!",
+			"token":   token,
+		})
 	}
 
 	return c.String(http.StatusUnauthorized, "Your username or password were wrong")
+}
+
+func createJWTToken() (string, error) {
+	claims := JwtClaims{
+		"joe",
+		jwt.StandartClaims{
+			Id:        "main_user_id",
+			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
+		},
+	}
+
+	rawToken := jwt.NewWithClaims(jwt.SiginingMethodHS512, claims)
+
+	token, err := rawToken.SignedString([]byte("mySecret"))
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+
 }
 
 func checkCookie(next echo.HandlerFunc) echo.HandlerFunc {
