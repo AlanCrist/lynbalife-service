@@ -27,6 +27,7 @@ func main() {
 
 	adminGroup := e.Group("/admin")
 	cookieGroup := e.Group("/cookie")
+	jwtGroup := e.Group("/jwt")
 
 	adminGroup.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: `[${time_rfc3339}]  ${status}  ${method}  ${host}${path}  ${latency_human}` + "\n",
@@ -41,10 +42,16 @@ func main() {
 		return false, nil
 	}))
 
+	jwtGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningMethod: "HS512",
+		SigningKey:    []byte("mySecret"),
+	}))
+
 	cookieGroup.Use(checkCookie)
 
 	cookieGroup.GET("/main", mainCookie)
 	adminGroup.GET("/main", mainAdmin)
+	jwtGroup.GET("/main", mainJwt)
 
 	e.GET("/login", login)
 	e.GET("/", yello)
@@ -62,6 +69,17 @@ func mainAdmin(c echo.Context) error {
 
 func mainCookie(c echo.Context) error {
 	return c.String(http.StatusOK, "horay you are on the secret cookie main page")
+}
+
+func mainJwt(c echo.Context) error {
+	user := c.Get("user")
+	token := user.(*jwt.Token)
+
+	claims := token.Claims.(jwt.MapClaims)
+
+	log.Println("Username: ", claims["Name"], "User ID", claims["jti"])
+
+	return c.String(http.StatusOK, "you are on the top secret jwt page!")
 }
 
 func login(c echo.Context) error {
