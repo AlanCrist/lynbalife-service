@@ -15,7 +15,7 @@ import (
 
 type JwtClaims struct {
 	Name string `json: "name"`
-	jwt.StandartClaims
+	jwt.StandardClaims
 }
 
 func main() {
@@ -95,13 +95,13 @@ func login(c echo.Context) error {
 func createJWTToken() (string, error) {
 	claims := JwtClaims{
 		"joe",
-		jwt.StandartClaims{
+		jwt.StandardClaims{
 			Id:        "main_user_id",
 			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
 		},
 	}
 
-	rawToken := jwt.NewWithClaims(jwt.SiginingMethodHS512, claims)
+	rawToken := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
 
 	token, err := rawToken.SignedString([]byte("mySecret"))
 	if err != nil {
