@@ -1,7 +1,8 @@
 package api
 
 import (
-	"../api/handlers"
+	"api/handlers"
+
 	"github.com/labstack/echo"
 )
 

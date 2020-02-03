@@ -1,8 +1,8 @@
 package router
 
 import (
-	"../api"
-	"../api/middlewares"
+	"api"
+	"api/middlewares"
 
 	"github.com/labstack/echo"
 )

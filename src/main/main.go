@@ -2,8 +2,7 @@ package main
 
 import (
 	"fmt"
-
-	"../router"
+	"router"
 )
 
 func main() {
